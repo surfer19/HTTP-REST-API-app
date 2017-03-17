@@ -6,7 +6,7 @@
  * Ondrej Rysavy (rysavy@fit.vutbr.cz)
  *
  */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +17,29 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <string>
+#include <string.h>
+#include <time.h>
+
+using namespace std;
+
 #define BUFSIZE 1024
+
+
+const string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%A, %d %b %Y %X %Z", &tstruct);
+
+    return buf;
+}
+
+
 int main (int argc, const char * argv[]) {
 
 	int client_socket, port_number, bytestx, bytesrx;
@@ -25,7 +47,7 @@ int main (int argc, const char * argv[]) {
     const char *server_hostname;
     struct hostent *server;
     struct sockaddr_in server_address;
-    char buf[BUFSIZE];
+    //char *buf;//[BUFSIZE];
      
     /* 1. test vstupnich parametru: */
     if (argc != 3) {
@@ -59,28 +81,76 @@ int main (int argc, const char * argv[]) {
 	}
 	    
     /* nacteni zpravy od uzivatele */
-    bzero(buf, BUFSIZE);
-    printf("Please enter msg: ");
-    fgets(buf, BUFSIZE, stdin);
-    
+    //bzero(buf, BUFSIZE);
+    //printf("Please enter msg: ");
+
+    string command ="mkd ";
+    // TODO convert input like this to remote REST address - name:port/user/dir
+    string remote_path ="http://localhost:12345/tonda/foo/bar";
+
+    // TODO parse local_path
+    cout << "command           : " << command << endl ;
+    cout << "rem path          : " << command << endl ;
+
+    /*
+     * create http header
+     */
+    string rest_command = string("PUT /Users/majko/Desktop/foo/daco?type=folder HTTP/1.1 ") + "\r\n";
+    string host = string("Host: ") + inet_ntoa(server_address.sin_addr) + " \r\n ";
+    string date = "Date: " + currentDateTime() + " \r\n ";
+    string accept = string("Accept: application/json") + " \r\n ";
+    string accept_encoding = string("Accept-Encoding: identity") + " \r\n ";
+    string content_type = string("Content-Type: application/octet-stream") + " \r\n ";
+    string content_length = string("Content-Length: 12345") + " \r\n ";
+
+    /*
+     *  concatenate header and convert to char *
+     */
+
+    string final_header = rest_command + host + date + accept + accept_encoding + content_type + content_length;
+
+    //    Use strdup() to copy the const char * returned by c_str()
+    //    into a char * TODO (remember to free() it afterwards)
+    //    fgets(buf, BUFSIZE, stdin);
+    char *buf = strdup(final_header.c_str());
+
+    cout << "------- header --------" << endl;
+    cout << final_header;
+
+
+    cout << "" << endl;
+
     if (connect(client_socket, (const struct sockaddr *) &server_address, sizeof(server_address)) != 0)
     {
 		perror("ERROR: connect");
 		exit(EXIT_FAILURE);        
     }
 
+    cout << "pred sendom" << endl;
     /* odeslani zpravy na server */
+    //cout << buf << endl;
     bytestx = send(client_socket, buf, strlen(buf), 0);
-    if (bytestx < 0) 
-      perror("ERROR in sendto");
-    
-    /* prijeti odpovedi a jeji vypsani */
-    bytesrx = recv(client_socket, buf, BUFSIZE, 0);
-    if (bytesrx < 0) 
-      perror("ERROR in recvfrom");
+
+    cout << "send = " << bytestx << endl;
+
+    while (bytesrx = recv(client_socket, buf, BUFSIZE, 0) > 0) {
+
+/*        if (bytestx < 0) {
+            perror("ERROR in sendto");
+        }*/
+        /* prijeti odpovedi a jeji vypsani */
+
+        if (bytesrx < 0) {
+            perror("ERROR in recvfrom");
+            break;
+        }
+    }
+
+
       
     printf("Echo from server: %s", buf);
         
     close(client_socket);
     return 0;
 }
+
