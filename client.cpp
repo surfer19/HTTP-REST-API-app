@@ -26,6 +26,14 @@ using namespace std;
 
 #define BUFSIZE 1024
 
+// arg 1 - string
+// arg 2 - find substr
+int isInString(string s1, string s2){
+    if (s1.find(s2) != string::npos) {
+        return 1;
+    }
+    return -1;
+}
 
 const string currentDateTime() {
     time_t     now = time(0);
@@ -38,7 +46,7 @@ const string currentDateTime() {
 
     return buf;
 }
-
+// todo ip port
 
 int main (int argc, const char * argv[]) {
 
@@ -48,14 +56,85 @@ int main (int argc, const char * argv[]) {
     struct hostent *server;
     struct sockaddr_in server_address;
     //char *buf;//[BUFSIZE];
-     
+
+    /*
+     *
+     *  parse args
+     */
+    // TODO convert input like this to remote REST address - name:port/user/dir
+    // todo mkd http://localhost:12345/tonda/foo/bar
+    // todo localhost
+    // todo 12345
+    const char * command  = argv[1];
+    const char * all_path = argv[2];
+    string s_command = command;
+    string s_path = all_path;
+    cout <<  "command = " <<  command << endl;
+    cout <<  "path = " << all_path << endl;
+    string serv_hostname;
+    string serv_port;
+    string serv_path;
+
+    s_path.erase(0,7); // delete first 7 chars http://
+
+    string delimiter = ":";
+    serv_hostname = s_path.substr(0, s_path.find(delimiter)); // get ip/localhost
+
+    // delete ip/localhost from path
+    s_path.erase(0,serv_hostname.length() +1); // +1 for delete ':'
+
+    // get port
+    string delimiter2 = "/";
+    serv_port = s_path.substr(0, s_path.find(delimiter2)); // get ip/localhost
+
+    // delete port
+    s_path.erase(0,serv_port.length());
+
+    // just path stay here now
+    serv_path = s_path;
+
     /* 1. test vstupnich parametru: */
     if (argc != 3) {
        fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
        exit(EXIT_FAILURE);
     }
-    server_hostname = argv[1];
-    port_number = atoi(argv[2]);
+    server_hostname = strdup(serv_hostname.c_str());
+    port_number = stoi(serv_port);
+
+    cout << "final hostname = " << server_hostname << endl;
+    cout << "final port = " << port_number << endl;
+
+    // todo default port
+
+    /*
+     *
+     *  convert client command to server command
+     *
+     */
+    string final_command;
+   if (s_command == "del" || s_command == "rmd") {
+       final_command = "DELETE";
+   }
+   else if (s_command == "get" || s_command == "lst") {
+       final_command = "GET";
+   }
+   else if (s_command == "put" || s_command == "mkd") {
+       cout << "dnu";
+       final_command = "PUT";
+   }
+   else {
+       fprintf(stderr,"unknown command %s \n", final_command.c_str());
+   }
+    string type_of_medium;
+    // its file or folder ?
+    if (isInString(s_path, ".") != -1){
+        // its file
+        type_of_medium = "file";
+    }
+    else {
+        type_of_medium = "folder";
+    }
+
     
     /* 2. ziskani adresy serveru pomoci DNS */
     
@@ -84,18 +163,13 @@ int main (int argc, const char * argv[]) {
     //bzero(buf, BUFSIZE);
     //printf("Please enter msg: ");
 
-    string command ="mkd ";
-    // TODO convert input like this to remote REST address - name:port/user/dir
     string remote_path ="http://localhost:12345/tonda/foo/bar";
-
-    // TODO parse local_path
-    cout << "command           : " << command << endl ;
-    cout << "rem path          : " << command << endl ;
 
     /*
      * create http header
      */
-    string rest_command = string("PUT /Users/majko/Desktop/foo/daco?type=folder HTTP/1.1 ") + "\r\n";
+    // DELETE /Users/majko/workspace/HTTP-REST-API-app/client.cpp
+    string rest_command = final_command + " " + serv_path + "?type=" + type_of_medium + string(" HTTP/1.1 ") + " \r\n ";
     string host = string("Host: ") + inet_ntoa(server_address.sin_addr) + " \r\n ";
     string date = "Date: " + currentDateTime() + " \r\n ";
     string accept = string("Accept: application/json") + " \r\n ";
@@ -118,27 +192,22 @@ int main (int argc, const char * argv[]) {
     cout << final_header;
 
 
-    cout << "" << endl;
-
     if (connect(client_socket, (const struct sockaddr *) &server_address, sizeof(server_address)) != 0)
     {
 		perror("ERROR: connect");
 		exit(EXIT_FAILURE);        
     }
 
-    cout << "pred sendom" << endl;
     /* odeslani zpravy na server */
-    //cout << buf << endl;
     bytestx = send(client_socket, buf, strlen(buf), 0);
+    // send err
+    if (bytestx < 0) {
+        perror("ERROR in sendto");
+    }
 
-    cout << "send = " << bytestx << endl;
+    //cout << "send = " << bytestx << endl;
 
     while (bytesrx = recv(client_socket, buf, BUFSIZE, 0) > 0) {
-
-/*        if (bytestx < 0) {
-            perror("ERROR in sendto");
-        }*/
-        /* prijeti odpovedi a jeji vypsani */
 
         if (bytesrx < 0) {
             perror("ERROR in recvfrom");
@@ -147,8 +216,7 @@ int main (int argc, const char * argv[]) {
     }
 
 
-      
-    printf("Echo from server: %s", buf);
+    printf("[CLIENT] RESPONSE from server: %s \n", buf);
         
     close(client_socket);
     return 0;
