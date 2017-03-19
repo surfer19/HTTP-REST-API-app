@@ -1,9 +1,9 @@
 /*
- * IPK.2015L
+ * IPK.2017
  *
- * Demonstration of trivial TCP communication.
+ * TCP communication with REST API.
  *
- * Ondrej Rysavy (rysavy@fit.vutbr.cz)
+ * Marián Mrva (xmrvam01)
  *
  */
 
@@ -57,14 +57,16 @@ int main (int argc, const char * argv[]) {
     struct sockaddr_in server_address;
     //char *buf;//[BUFSIZE];
 
+    /* 1. test vstupnich parametru: */
+    if (argc != 3) {
+        fprintf(stderr, "Unknown error.\n");
+        exit(EXIT_FAILURE);
+    }
+
     /*
      *
      *  parse args
      */
-    // TODO convert input like this to remote REST address - name:port/user/dir
-    // todo mkd http://localhost:12345/tonda/foo/bar
-    // todo localhost
-    // todo 12345
     const char * command  = argv[1];
     const char * all_path = argv[2];
     string s_command = command;
@@ -72,7 +74,7 @@ int main (int argc, const char * argv[]) {
     cout <<  "command = " <<  command << endl;
     cout <<  "path = " << all_path << endl;
     string serv_hostname;
-    string serv_port = "6677";
+    string serv_port = "";
     string serv_path;
 
     s_path.erase(0,7); // delete first 7 chars http://
@@ -93,11 +95,6 @@ int main (int argc, const char * argv[]) {
     // just path stay here now
     serv_path = s_path;
 
-    /* 1. test vstupnich parametru: */
-    if (argc != 3) {
-       fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
-       exit(EXIT_FAILURE);
-    }
     server_hostname = strdup(serv_hostname.c_str());
     port_number = stoi(serv_port);
 
@@ -119,11 +116,10 @@ int main (int argc, const char * argv[]) {
        final_command = "GET";
    }
    else if (s_command == "put" || s_command == "mkd") {
-       cout << "dnu";
        final_command = "PUT";
    }
    else {
-       fprintf(stderr,"unknown command %s \n", final_command.c_str());
+       fprintf(stderr,"Unknown error.%s \n");
    }
     string type_of_medium;
     // its file or folder ?
@@ -158,13 +154,8 @@ int main (int argc, const char * argv[]) {
 		perror("ERROR: socket");
 		exit(EXIT_FAILURE);
 	}
-	    
-    /* nacteni zpravy od uzivatele */
-    //bzero(buf, BUFSIZE);
-    //printf("Please enter msg: ");
 
     string remote_path ="http://localhost:12345/tonda/foo/bar";
-
     /*
      * create http header
      */
@@ -215,8 +206,27 @@ int main (int argc, const char * argv[]) {
         }
     }
 
-
     printf("[CLIENT] RESPONSE from server: %s \n", buf);
+
+    string s_header = string(buf);
+    string s_helper = "";
+    string s_error = "";
+
+    if (isInString(s_header, "ERR") != -1) {
+        // its err
+        // get error string
+        string delimiter = "ERR";
+        s_helper = s_header.substr(0, s_header.find(delimiter)); // get all chars before 'ERR:'
+        s_header.erase(0,s_helper.length());
+
+        s_header.erase(0, 4); // rm 'ERR:'
+
+        s_error = s_header;
+        fprintf(stderr, "%s \n", s_error.c_str());
+
+    }
+
+
         
     close(client_socket);
     return 0;

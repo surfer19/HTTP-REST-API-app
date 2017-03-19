@@ -1,9 +1,9 @@
 /*
- * IPK.2015L
+ * IPK.2017
  *
- * Demonstration of trivial TCP communication.
+ * TCP communication with REST API.
  *
- * Ondrej Rysavy (rysavy@fit.vutbr.cz)
+ * Marián Mrva (xmrvam01)
  *
  */
 
@@ -27,11 +27,11 @@ using namespace std;
 int makeDir(string rest_path);
 int removeDir(string rest_path);
 string lsDir(string rest_path);
-int rmFile(string file_path, string file_name);
-string setServerHttpHeader(int response, string data);
+int rmFile(string file_path);
+string setServerHttpHeader(int response, string data, string error_string);
 const string currentDateTime();
 
-void parseClientHeader(char *buff, int comm_socket);
+void parseClientHeader(char *buff, int comm_socket, string root_path);
 vector<string> split_string(const string& str, const string& delimiter);
 int isInString(string s1, string s2);
 
@@ -43,13 +43,49 @@ int main (int argc, const char * argv[]) {
 	struct sockaddr_in6 sa_client;
 	char str[INET6_ADDRSTRLEN];
     int port_number;
-    
-    if (argc != 3) {
-       fprintf(stderr,"usage: %s <port>\n", argv[0]);
-       exit(EXIT_FAILURE);
-    }
-    port_number = atoi(argv[2]);
-    
+
+    string root_path = "";
+
+	if (argc == 1) {
+		port_number = 6677;
+		root_path = "";
+	}
+	else if (argc == 3){
+		// have some root path on first place
+		if (string(argv[1]) == "-r"){
+			port_number = 6677;
+			root_path = argv[2];
+		}
+		else if(string(argv[1]) == "-p") {
+			port_number = atoi(argv[2]);
+			root_path = "";
+		}
+		else {
+			fprintf(stderr, "Unknown error.\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else if (argc == 5){
+		root_path = argv[2];
+		port_number = atoi(argv[4]);
+	}
+	else {
+		fprintf(stderr, "Unknown error.\n");
+		exit(EXIT_FAILURE);
+	}
+
+    //port_number = atoi(argv[2]);
+	// if last char is '/' remove them
+	char *cstr = &root_path.back();
+	if (strcmp(cstr, "/") == 0) {
+		root_path.erase(root_path.end() - 1);
+		cout << "wiiii = " << root_path;
+	}
+	//if ( last_char == "/"){
+	////	cout << "som kral";
+		//str.erase( str.end()-1 )
+	//}
+
     
 	socklen_t sa_client_len=sizeof(sa_client);
 	if ((welcome_socket = socket(PF_INET6, SOCK_STREAM, 0)) < 0)
@@ -99,7 +135,7 @@ int main (int argc, const char * argv[]) {
 //					break;
 			//}
 			//cout << "po cykle " << ahoj << endl;
-			parseClientHeader(buff, comm_socket);
+			parseClientHeader(buff, comm_socket, root_path);
 			//send(comm_socket, buff, strlen(buff), 0);
 		}
 		else
@@ -111,7 +147,7 @@ int main (int argc, const char * argv[]) {
 	}	
 }
 
-void parseClientHeader(char *buff, int comm_socket){
+void parseClientHeader(char *buff, int comm_socket, string root_path){
 	cout << "[SERVER] toto parsujem" << endl;
 
 	// convert char * to string
@@ -177,9 +213,15 @@ void parseClientHeader(char *buff, int comm_socket){
 		// get path
 		delimiter2 = "?";
 		rest_path = rest_command.substr(0, rest_command.find(delimiter2)); // rest path to folder
+		string rest_tmp = rest_path;
+		// todo pre file
+		if (root_path != ""){
+			root_path += rest_path;
+			rest_path = root_path;
+		}
 
 		// delete path from string
-		length_rest_path = rest_path.length();
+		length_rest_path = rest_tmp.length();
 		rest_command.erase(0,length_rest_path + 1); // +1 because we want erase '?' too
 
 	}
@@ -207,6 +249,8 @@ void parseClientHeader(char *buff, int comm_socket){
 	 */
 	int ret_code_mkd;
 	int ret_code_rmd;
+	string error_string = "";
+	string ls_string = "";
 
 	if (create_folder == 1){
 
@@ -217,19 +261,19 @@ void parseClientHeader(char *buff, int comm_socket){
 			response = 200;
 		}
 		else if (ret_code_mkd == 2 ){
-			fprintf(stderr, "%s", "Already exists.\n");
+			error_string = "Already exists.";
 			response = 400;
 		}
 		// todo not in wis? :/
 		else if (ret_code_mkd == 1){
-			fprintf(stderr, "%s", "Directory not found.\n");
+			error_string = "Directory not found.";
 			response = 404;
 		}
 		else {
-			fprintf(stderr, "%s", "Unknown error.\n");
+			error_string = "Unknown error.";
 			response = 400;
 		}
-		string str_header = setServerHttpHeader(response, "");
+		string str_header = setServerHttpHeader(response, "", error_string);
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
 	}
@@ -243,18 +287,18 @@ void parseClientHeader(char *buff, int comm_socket){
 			response = 200;
 		}
 		else if (ret_code_rmd == 1){
-			fprintf(stderr, "%s", "Directory not empty.\n");
+			error_string = "Directory not empty.";
 			response = 400;
 		}
 		else if (ret_code_rmd == 2) {
-			fprintf(stderr, "%s", "Directory not found.\n");
+			error_string = "Directory not found.";
 			response = 404;
 		}
 		else if (ret_code_rmd == 3){
-			fprintf(stderr, "%s", "Unknown error.\n");
+			error_string = "Unknown error.";
 			response = 400;
 		}
-		string str_header = setServerHttpHeader(response, "");
+		string str_header = setServerHttpHeader(response, "", error_string);
 		strcpy(server_buff, strdup(str_header.c_str()));
 		cout << "server buffer pred odoslanim na clienta" << server_buff << endl;
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
@@ -262,13 +306,14 @@ void parseClientHeader(char *buff, int comm_socket){
 
 	if (get_folder == 1) {
 		cout << "ls to folder" << endl;
-		string ls_string = lsDir(rest_path);
+		ls_string = lsDir(rest_path);
 
 		// into a char * TODO (remember to free() it afterwards)
 		// buff = strdup(ls_string.c_str());
 
 		if (ls_string == "1"){
-			fprintf(stderr, "%s", "Directory not found.\n");
+			//fprintf(stderr, "%s", "Directory not found.\n");
+			error_string = "Directory not found.";
 			response = 404;
 		}
 		// todo
@@ -278,7 +323,7 @@ void parseClientHeader(char *buff, int comm_socket){
 
 		// clear buff and set new header
 		// push data after header
-		string str_header = setServerHttpHeader(response, ls_string);
+		string str_header = setServerHttpHeader(response, ls_string, error_string);
 		//server_buff = strdup(str_header.c_str());
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, strlen(server_buff) , 0);//strlen(server_buff)
@@ -287,30 +332,30 @@ void parseClientHeader(char *buff, int comm_socket){
 	if (delete_file == 1){
 		// 0 ok
 		// 1 error
-		ret_code_del_file = rmFile(rest_path, "");
+		ret_code_del_file = rmFile(rest_path);
 		if (ret_code_del_file == 0){
 			response = 200;
 			cout << "Successfull rm file" << endl;
 		}
 		// todo 400
 		else {
-			fprintf(stderr, "%s", "File not found.\n");
+			//fprintf(stderr, "%s", "File not found.\n");
+			error_string = "File not found.";
 			response = 404;
 		}
 
 		// clear buff and set new header
 		// push data after header
-		string str_header = setServerHttpHeader(response, "");
+		string str_header = setServerHttpHeader(response, "", error_string);
 		//server_buff = strdup(str_header.c_str());
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, strlen(server_buff) , 0);//strlen(server_buff)
-
 	}
 
 	cout << "[SERVER] end parse";
 }
 
-string setServerHttpHeader(int response, string data) {
+string setServerHttpHeader(int response, string data, string error_string) {
 //	200 OK - operace byla provedena úsopěšně
 //	404 Not Found - objekt (soubor/adresář) v požadavku neexistuje
 //	400 Bad Request - při přístupu k objektu jiného typu než uvedeného v požadaku
@@ -339,12 +384,12 @@ string setServerHttpHeader(int response, string data) {
 
 	string server_data = data;
 
-	string final_header = http_response + date + content_type + content_length + content_encoding + server_data;
+	string final_header = http_response + date + content_type + content_length + content_encoding + server_data + "\n" + "ERR:" + error_string;
 
 	return final_header;
 }
 
-int rmFile(string file_path, string file_name){
+int rmFile(string file_path){
 	FILE * file;
 	file = fopen(strdup(file_path.c_str()), "r");
 	if (file){
