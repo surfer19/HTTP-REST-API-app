@@ -223,7 +223,6 @@ int main (int argc, const char * argv[]) {
 
         s_error = s_header;
         fprintf(stderr, "%s \n", s_error.c_str());
-
     }
         
     close(client_socket);

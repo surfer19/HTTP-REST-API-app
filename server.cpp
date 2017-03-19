@@ -253,7 +253,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	string ls_string = "";
 
 	if (create_folder == 1){
-
+		cout << "dir for make !! = " << rest_path << endl;
 		ret_code_mkd = makeDir(rest_path);
 
 		if (ret_code_mkd == 0){
@@ -307,9 +307,6 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	if (get_folder == 1) {
 		cout << "ls to folder" << endl;
 		ls_string = lsDir(rest_path);
-
-		// into a char * TODO (remember to free() it afterwards)
-		// buff = strdup(ls_string.c_str());
 
 		if (ls_string == "1"){
 			//fprintf(stderr, "%s", "Directory not found.\n");
@@ -384,12 +381,12 @@ string setServerHttpHeader(int response, string data, string error_string) {
 
 	string server_data = data;
 
-	string err;
-	if (error_string != ""){
-		err = "ERR:";
+	string err = "";
+	if (error_string.empty()){
+		err = "";
 	}
 	else {
-		err = "";
+		err = "ERR:";
 	}
 	string final_header = http_response + date + content_type + content_length + content_encoding + server_data + "\n" + err + error_string;
 
