@@ -203,10 +203,6 @@ int main (int argc, const char * argv[]) {
     string s_error = "";
 
     string delimiter3 = ".\n";
-    string s_help = s_header.substr(0, s_header.find(delimiter3)); // get all chars before 'ERR:'
-    s_header.erase(0,s_help.length());
-
-    cout << s_header;
 
     if (isInString(s_header, "ERR") != -1) {
         // its err
@@ -217,6 +213,12 @@ int main (int argc, const char * argv[]) {
         s_header.erase(0, 4); // rm 'ERR:'
         s_error = s_header;
         fprintf(stderr, "%s \n", s_error.c_str());
+    }
+    else {
+        string s_help = s_header.substr(0, s_header.find(delimiter3)); // get all chars before 'ERR:'
+        s_header.erase(0,s_help.length());
+
+        cout << s_header;
     }
 
     close(client_socket);
