@@ -384,7 +384,14 @@ string setServerHttpHeader(int response, string data, string error_string) {
 
 	string server_data = data;
 
-	string final_header = http_response + date + content_type + content_length + content_encoding + server_data + "\n" + "ERR:" + error_string;
+	string err;
+	if (error_string != ""){
+		err = "ERR:";
+	}
+	else {
+		err = "";
+	}
+	string final_header = http_response + date + content_type + content_length + content_encoding + server_data + "\n" + err + error_string;
 
 	return final_header;
 }

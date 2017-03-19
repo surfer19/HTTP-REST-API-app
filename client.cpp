@@ -225,8 +225,6 @@ int main (int argc, const char * argv[]) {
         fprintf(stderr, "%s \n", s_error.c_str());
 
     }
-
-
         
     close(client_socket);
     return 0;
