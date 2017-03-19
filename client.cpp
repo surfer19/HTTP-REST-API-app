@@ -207,14 +207,14 @@ int main (int argc, const char * argv[]) {
     }
 
     printf("[CLIENT] RESPONSE from server: %s \n", buf);
-    //cout << "vazne to tu spadne????" << endl;
-    //string s_header = buf;
+    cout << "vazne to tu spadne????" << endl;
+    string s_header = buf;
 
-    //string s_helper = "";
-    //string s_error = "";
-    //cout << "TU" << endl;
+    string s_helper = "";
+    string s_error = "";
+    cout << "TU" << endl;
 
-/*    if (isInString(s_header, "ERR") != -1) {
+    if (isInString(s_header, "ERR") != -1) {
         cout << "TU1" << endl;
         // its err
         // get error string
@@ -231,7 +231,7 @@ int main (int argc, const char * argv[]) {
         cout << "TU6" << endl;
         fprintf(stderr, "%s \n", s_error.c_str());
     }
-        */
+
     close(client_socket);
     return 0;
 }
