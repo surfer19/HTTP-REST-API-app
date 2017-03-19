@@ -55,7 +55,7 @@ int main (int argc, const char * argv[]) {
     const char *server_hostname;
     struct hostent *server;
     struct sockaddr_in server_address;
-    //char *buf;//[BUFSIZE];
+    char buf[BUFSIZE];//;
 
     /* 1. test vstupnich parametru: */
     if (argc != 3) {
@@ -177,7 +177,8 @@ int main (int argc, const char * argv[]) {
     //    Use strdup() to copy the const char * returned by c_str()
     //    into a char * TODO (remember to free() it afterwards)
     //    fgets(buf, BUFSIZE, stdin);
-    char *buf = strdup(final_header.c_str());
+
+    strcpy(buf, final_header.c_str());
 
     cout << "------- header --------" << endl;
     cout << final_header;
