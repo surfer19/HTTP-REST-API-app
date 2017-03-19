@@ -211,17 +211,23 @@ int main (int argc, const char * argv[]) {
     string s_header = string(buf);
     string s_helper = "";
     string s_error = "";
+    cout << "TU" << endl;
 
     if (isInString(s_header, "ERR") != -1) {
+        cout << "TU1" << endl;
         // its err
         // get error string
         string delimiter = "ERR";
+        cout << "TU2" << endl;
         s_helper = s_header.substr(0, s_header.find(delimiter)); // get all chars before 'ERR:'
+        cout << "TU3" << endl;
         s_header.erase(0,s_helper.length());
+        cout << "TU4" << endl;
 
         s_header.erase(0, 4); // rm 'ERR:'
-
+        cout << "T5" << endl;
         s_error = s_header;
+        cout << "TU6" << endl;
         fprintf(stderr, "%s \n", s_error.c_str());
     }
         
