@@ -195,7 +195,7 @@ int main (int argc, const char * argv[]) {
     if (bytestx < 0) {
         perror("ERROR in sendto");
     }
-
+    memset(buf, '\0', sizeof(buf));
     //cout << "send = " << bytestx << endl;
 
     while (bytesrx = recv(client_socket, buf, BUFSIZE, 0) > 0) {
@@ -206,7 +206,7 @@ int main (int argc, const char * argv[]) {
         }
     }
 
-    //printf("[CLIENT] RESPONSE from server: %s \n", buf);
+    printf("[CLIENT] RESPONSE from server: %s \n", buf);
     //cout << "vazne to tu spadne????" << endl;
     //string s_header = buf;
 
