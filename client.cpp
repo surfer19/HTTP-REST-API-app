@@ -214,7 +214,7 @@ int main (int argc, const char * argv[]) {
     string s_error = "";
     cout << "TU" << endl;
 
-    if (isInString(s_header, "ERR") != -1) {
+/*    if (isInString(s_header, "ERR") != -1) {
         cout << "TU1" << endl;
         // its err
         // get error string
@@ -231,7 +231,7 @@ int main (int argc, const char * argv[]) {
         cout << "TU6" << endl;
         fprintf(stderr, "%s \n", s_error.c_str());
     }
-        
+        */
     close(client_socket);
     return 0;
 }
