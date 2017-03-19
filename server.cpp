@@ -185,7 +185,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	// buffer for send data to client
 	char server_buff[1024];
 
-	int response;
+	int response = 0;
 	int ret_code_del_file;
 	int length_rest_path;
 	int create_folder = 0;
@@ -269,10 +269,10 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 			error_string = "Directory not found.";
 			response = 404;
 		}
-		else {
-			error_string = "Unknown error.";
-			response = 400;
-		}
+//		else {
+//			error_string = "Unknown error.";
+//			response = 400;
+//		}
 		string str_header = setServerHttpHeader(response, "", error_string);
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
