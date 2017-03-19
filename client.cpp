@@ -72,7 +72,7 @@ int main (int argc, const char * argv[]) {
     cout <<  "command = " <<  command << endl;
     cout <<  "path = " << all_path << endl;
     string serv_hostname;
-    string serv_port;
+    string serv_port = "6677";
     string serv_path;
 
     s_path.erase(0,7); // delete first 7 chars http://

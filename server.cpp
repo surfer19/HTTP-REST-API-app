@@ -44,11 +44,11 @@ int main (int argc, const char * argv[]) {
 	char str[INET6_ADDRSTRLEN];
     int port_number;
     
-    if (argc != 2) {
+    if (argc != 3) {
        fprintf(stderr,"usage: %s <port>\n", argv[0]);
        exit(EXIT_FAILURE);
     }
-    port_number = atoi(argv[1]);
+    port_number = atoi(argv[2]);
     
     
 	socklen_t sa_client_len=sizeof(sa_client);
@@ -98,14 +98,9 @@ int main (int argc, const char * argv[]) {
 //				if (res <= 0)
 //					break;
 			//}
-
-
 			//cout << "po cykle " << ahoj << endl;
-
 			parseClientHeader(buff, comm_socket);
-
 			//send(comm_socket, buff, strlen(buff), 0);
-
 		}
 		else
 		{
