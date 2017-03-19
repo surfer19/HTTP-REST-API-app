@@ -240,10 +240,12 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 			error_string = "Already exists.";
 			response = 400;
 		}
-		// todo not in wis? :/
 		else if (ret_code_mkd == 1){
 			error_string = "Directory not found.";
 			response = 404;
+		}
+		else {
+			response = 200;
 		}
 
 		string str_header = setServerHttpHeader(response, "", error_string);
