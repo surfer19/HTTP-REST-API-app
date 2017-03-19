@@ -37,7 +37,6 @@ int isInString(string s1, string s2);
 
 
 int main (int argc, const char * argv[]) {
-	int rc;
 	int welcome_socket;
 	struct sockaddr_in6 sa;
 	struct sockaddr_in6 sa_client;
@@ -74,18 +73,10 @@ int main (int argc, const char * argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-    //port_number = atoi(argv[2]);
-	// if last char is '/' remove them
 	char *cstr = &root_path.back();
 	if (strcmp(cstr, "/") == 0) {
 		root_path.erase(root_path.end() - 1);
-		cout << "wiiii = " << root_path;
 	}
-	//if ( last_char == "/"){
-	////	cout << "som kral";
-		//str.erase( str.end()-1 )
-	//}
-
     
 	socklen_t sa_client_len=sizeof(sa_client);
 	if ((welcome_socket = socket(PF_INET6, SOCK_STREAM, 0)) < 0)
@@ -98,9 +89,7 @@ int main (int argc, const char * argv[]) {
 	sa.sin6_family = AF_INET6;
 	sa.sin6_addr = in6addr_any;
 	sa.sin6_port = htons(port_number);	
-        
-    
-    // todo why it crash with 'using namespace std;' ??
+
 	if ((::bind(welcome_socket, (struct sockaddr*)&sa, sizeof(sa))) < 0)
 	{
 		perror("ERROR: bind");
@@ -116,39 +105,24 @@ int main (int argc, const char * argv[]) {
 		int comm_socket = accept(welcome_socket, (struct sockaddr*)&sa_client, &sa_client_len);		
 		if (comm_socket > 0)
 		{
-			if(inet_ntop(AF_INET6, &sa_client.sin6_addr, str, sizeof(str))) {
-				printf("INFO: New connection:\n");
-				printf("INFO: Client address is %s\n", str);
-				printf("INFO: Client port is %d\n", ntohs(sa_client.sin6_port));
-			}
+			inet_ntop(AF_INET6, &sa_client.sin6_addr, str, sizeof(str));
+//				printf("INFO: New connection:\n");
+//				printf("INFO: Client address is %s\n", str);
+//				printf("INFO: Client port is %d\n", ntohs(sa_client.sin6_port));
+//			}
 
 			char buff[1024];
-			int res = 0;
-			// todo rip endless loop
-			string ahoj = "";
-			//while ((res = recv(comm_socket, buff, 1024,0)) > 0) {
-				res = recv(comm_socket, buff, 1024,0);
-//				cout << "[SERVER] response" << res << endl;
-				ahoj.append(buff);
-			//	cout << "cycle " << ahoj << "\n";
-//				if (res <= 0)
-//					break;
-			//}
-			//cout << "po cykle " << ahoj << endl;
+			recv(comm_socket, buff, 1024,0);
 			parseClientHeader(buff, comm_socket, root_path);
-			//send(comm_socket, buff, strlen(buff), 0);
 		}
-		else
-		{
-			printf(".");
-		}
-	printf("Connection to %s closed\n",str);
+
+		//fprintf(stderr, "Connection to closed\n");
 		close(comm_socket);
 	}	
 }
 
 void parseClientHeader(char *buff, int comm_socket, string root_path){
-	cout << "[SERVER] toto parsujem" << endl;
+	//cout << "[SERVER] toto parsujem" << endl;
 
 	// convert char * to string
 	string Str = string(buff);
@@ -163,17 +137,14 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	for (auto itr = strings.begin(); itr != strings.end(); itr++){
 		list_header_attributes.push_back(*itr);
 	}
-	// print attributes
-	//for (auto i = list_header_attributes.begin(); i != list_header_attributes.end(); ++i)
-	//	cout << *i << ' ';
 
 	string rest_command = list_header_attributes.at(0);
 	string host = list_header_attributes.at(1);
 	string date = list_header_attributes.at(2);
-	string accept = list_header_attributes.at(3);
+	/*string accept = list_header_attributes.at(3);
 	string accept_encoding = list_header_attributes.at(4);
 	string content_type = list_header_attributes.at(5);
-	string content_length = list_header_attributes.at(6);
+	string content_length = list_header_attributes.at(6);*/
 
 	// get type of rest request
 	string delimiter = " ";
@@ -195,10 +166,9 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	string rest_path;
 	string delimiter2;
 
-	int wtf;
 	// get folder!
 	if (isInString(rest_command, "folder") != -1){
-		cout << "REST COMMAND ITS FOLDER!" << endl;
+		//cout << "REST COMMAND ITS FOLDER!" << endl;
 
 		if(rest_type == "PUT"){
 			create_folder = 1;
@@ -214,7 +184,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 		delimiter2 = "?";
 		rest_path = rest_command.substr(0, rest_command.find(delimiter2)); // rest path to folder
 		string rest_tmp = rest_path;
-		// todo pre file
+
 		if (root_path != ""){
 			root_path += rest_path;
 			rest_path = root_path;
@@ -226,6 +196,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 
 	}
 	else if (isInString(rest_command, "file")) {
+		//cout << "REST COMMAND ITS FILE!" << endl;
 
 		if (rest_type == "DELETE"){
 			delete_file = 1;
@@ -234,12 +205,17 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 		// get path
 		delimiter2 = "?";
 		rest_path = rest_command.substr(0, rest_command.find(delimiter2)); // rest path to folder
+		string rest_tmp = rest_path;
+
+		if (root_path != ""){
+			root_path += rest_path;
+			rest_path = root_path;
+		}
 
 		// delete path from string
-		length_rest_path = rest_path.length();
+		length_rest_path = rest_tmp.length();
 		rest_command.erase(0,length_rest_path + 1); // +1 because we want erase '?' too
 
-		cout << "REST COMMAND ITS FILE!" << endl;
 	}
 
 	/*
@@ -253,11 +229,11 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 	string ls_string = "";
 
 	if (create_folder == 1){
-		cout << "dir for make !! = " << rest_path << endl;
+		//cout << "dir for make !! = " << rest_path << endl;
 		ret_code_mkd = makeDir(rest_path);
 
 		if (ret_code_mkd == 0){
-			cout << "successfull CREATE DIR" << endl;
+			//cout << "successfull CREATE DIR" << endl;
 			response = 200;
 		}
 		else if (ret_code_mkd == 2 ){
@@ -269,21 +245,18 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 			error_string = "Directory not found.";
 			response = 404;
 		}
-//		else {
-//			error_string = "Unknown error.";
-//			response = 400;
-//		}
+
 		string str_header = setServerHttpHeader(response, "", error_string);
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
 	}
 
 	if (delete_folder == 1){
-		cout << "remove dir = " << rest_path << endl;
+		//cout << "remove dir = " << rest_path << endl;
 		ret_code_rmd = removeDir(rest_path);
 
 		if (ret_code_rmd == 0){
-			cout << "successfull REMOVE DIR" << endl;
+			//cout << "successfull REMOVE DIR" << endl;
 			response = 200;
 		}
 		else if (ret_code_rmd == 1){
@@ -300,20 +273,16 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 		}
 		string str_header = setServerHttpHeader(response, "", error_string);
 		strcpy(server_buff, strdup(str_header.c_str()));
-		cout << "server buffer pred odoslanim na clienta" << server_buff << endl;
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
 	}
 
 	if (get_folder == 1) {
-		cout << "ls to folder" << endl;
 		ls_string = lsDir(rest_path);
 
 		if (ls_string == "1"){
-			//fprintf(stderr, "%s", "Directory not found.\n");
 			error_string = "Directory not found.";
 			response = 404;
 		}
-		// todo
 		else {
 			response = 200;
 		}
@@ -332,9 +301,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 		ret_code_del_file = rmFile(rest_path);
 		if (ret_code_del_file == 0){
 			response = 200;
-			cout << "Successfull rm file" << endl;
 		}
-		// todo 400
 		else {
 			//fprintf(stderr, "%s", "File not found.\n");
 			error_string = "File not found.";
@@ -348,8 +315,6 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 		strcpy(server_buff, strdup(str_header.c_str()));
 		send(comm_socket, server_buff, strlen(server_buff) , 0);//strlen(server_buff)
 	}
-
-	cout << "[SERVER] end parse";
 }
 
 string setServerHttpHeader(int response, string data, string error_string) {
@@ -397,20 +362,18 @@ int rmFile(string file_path){
 	FILE * file;
 	file = fopen(strdup(file_path.c_str()), "r");
 	if (file){
-		cout << "file exists" << endl;
+		//cout << "file exists" << endl;
 		//file exists and can be opened
 		// close file when you're done
 		fclose(file);
-		//return 1;
 	}
 	else {
 		//file doesn't exists or cannot be opened (es. you don't have access permission )
-		cout << "file doesnt exist";
+		//cout << "file doesnt exist";
 		return 1;
 	}
 	//char filename[] = file_path.c_str();
 	int ret = remove(file_path.c_str());
-	cout << "return remove = " << ret << endl;
 	if (ret != 0){
 		// err
 		return 1;
@@ -430,7 +393,7 @@ string lsDir(string rest_path){
 			ls_string.append(ent->d_name);
 			ls_string.append("\n");
 		}
-		//cout << ls_string;
+
 		closedir (dir);
 		return ls_string;
 	} else {
@@ -456,10 +419,9 @@ int makeDir(string rest_path){
 
 
 int removeDir(string rest_path){
+
 	int status;
 	status = rmdir(rest_path.c_str());
-	// Directory not found.
-	// Directory not empty. ENOTEMPTY
 
 	// its ok
 	if (status == 0){

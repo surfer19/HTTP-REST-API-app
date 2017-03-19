@@ -46,7 +46,6 @@ const string currentDateTime() {
 
     return buf;
 }
-// todo ip port
 
 int main (int argc, const char * argv[]) {
 
@@ -66,13 +65,14 @@ int main (int argc, const char * argv[]) {
     /*
      *
      *  parse args
+     *
      */
     const char * command  = argv[1];
     const char * all_path = argv[2];
     string s_command = command;
     string s_path = all_path;
-    cout <<  "command = " <<  command << endl;
-    cout <<  "path = " << all_path << endl;
+    //cout <<  "command = " <<  command << endl;
+    //cout <<  "path = " << all_path << endl;
     string serv_hostname;
     string serv_port = "";
     string serv_path;
@@ -98,10 +98,8 @@ int main (int argc, const char * argv[]) {
     server_hostname = strdup(serv_hostname.c_str());
     port_number = stoi(serv_port);
 
-    cout << "final hostname = " << server_hostname << endl;
-    cout << "final port = " << port_number << endl;
-
-    // todo default port
+//    cout << "final hostname = " << server_hostname << endl;
+//    cout << "final port = " << port_number << endl;
 
     /*
      *
@@ -130,7 +128,6 @@ int main (int argc, const char * argv[]) {
     else {
         type_of_medium = "folder";
     }
-
     
     /* 2. ziskani adresy serveru pomoci DNS */
     
@@ -146,7 +143,7 @@ int main (int argc, const char * argv[]) {
     server_address.sin_port = htons(port_number);
    
     /* tiskne informace o vzdalenem soketu */ 
-    printf("INFO: Server socket: %s : %d \n", inet_ntoa(server_address.sin_addr), ntohs(server_address.sin_port));
+    //fprintf(stderr, "INFO: Server socket: %s : %d \n", inet_ntoa(server_address.sin_addr), ntohs(server_address.sin_port));
     
     /* Vytvoreni soketu */
 	if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) <= 0)
@@ -173,15 +170,8 @@ int main (int argc, const char * argv[]) {
      */
 
     string final_header = rest_command + host + date + accept + accept_encoding + content_type + content_length;
-
-    //    Use strdup() to copy the const char * returned by c_str()
-    //    into a char * TODO (remember to free() it afterwards)
-    //    fgets(buf, BUFSIZE, stdin);
-
     strcpy(buf, final_header.c_str());
-
-    cout << "------- header --------" << endl;
-    cout << final_header;
+    //cout << final_header;
 
 
     if (connect(client_socket, (const struct sockaddr *) &server_address, sizeof(server_address)) != 0)
@@ -197,7 +187,6 @@ int main (int argc, const char * argv[]) {
         perror("ERROR in sendto");
     }
     memset(buf, '\0', sizeof(buf));
-    //cout << "send = " << bytestx << endl;
 
     while (bytesrx = recv(client_socket, buf, BUFSIZE, 0) > 0) {
 
@@ -207,35 +196,30 @@ int main (int argc, const char * argv[]) {
         }
     }
 
-    printf("[CLIENT] RESPONSE from server: %s \n", buf);
-    cout << "vazne to tu spadne????" << endl;
+    //printf("[CLIENT] RESPONSE from server: %s \n", buf);
     string s_header = buf;
 
     string s_helper = "";
     string s_error = "";
-    cout << "TU" << endl;
+
+    string delimiter3 = ".\n";
+    string s_help = s_header.substr(0, s_header.find(delimiter3)); // get all chars before 'ERR:'
+    s_header.erase(0,s_help.length());
+
+    cout << s_header;
 
     if (isInString(s_header, "ERR") != -1) {
-        cout << "TU1" << endl;
         // its err
         // get error string
         string delimiter = "ERR";
-        cout << "TU2" << endl;
         s_helper = s_header.substr(0, s_header.find(delimiter)); // get all chars before 'ERR:'
-        cout << "TU3" << endl;
         s_header.erase(0,s_helper.length());
-        cout << "TU4" << endl;
-
         s_header.erase(0, 4); // rm 'ERR:'
-        cout << "T5" << endl;
         s_error = s_header;
-        cout << "TU6" << endl;
         fprintf(stderr, "%s \n", s_error.c_str());
-        cout << "TU7" << endl;
     }
 
     close(client_socket);
-    cout << "TU8" << endl;
     return 0;
 }
 
