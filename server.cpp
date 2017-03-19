@@ -235,7 +235,7 @@ void parseClientHeader(char *buff, int comm_socket){
 	}
 
 	if (delete_folder == 1){
-
+		cout << "remove dir = " << rest_path << endl;
 		ret_code_rmd = removeDir(rest_path);
 
 		if (ret_code_rmd == 0){
@@ -256,6 +256,7 @@ void parseClientHeader(char *buff, int comm_socket){
 		}
 		string str_header = setServerHttpHeader(response, "");
 		strcpy(server_buff, strdup(str_header.c_str()));
+		cout << "server buffer pred odoslanim na clienta" << server_buff << endl;
 		send(comm_socket, server_buff, 1024 , 0);//strlen(server_buff)
 	}
 
