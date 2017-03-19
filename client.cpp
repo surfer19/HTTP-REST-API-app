@@ -152,7 +152,6 @@ int main (int argc, const char * argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-    string remote_path ="http://localhost:12345/tonda/foo/bar";
     /*
      * create http header
      */
@@ -160,10 +159,10 @@ int main (int argc, const char * argv[]) {
     string rest_command = final_command + " " + serv_path + "?type=" + type_of_medium + string(" HTTP/1.1 ") + " \r\n ";
     string host = string("Host: ") + inet_ntoa(server_address.sin_addr) + " \r\n ";
     string date = "Date: " + currentDateTime() + " \r\n ";
-    string accept = string("Accept: application/json") + " \r\n ";
+    string accept = string("Accept: text/plain") + " \r\n ";
     string accept_encoding = string("Accept-Encoding: identity") + " \r\n ";
-    string content_type = string("Content-Type: application/octet-stream") + " \r\n ";
-    string content_length = string("Content-Length: 12345") + " \r\n ";
+    string content_type = string("Content-Type: ") + " \r\n ";
+    string content_length = string("Content-Length: 0") + " \r\n ";
 
     /*
      *  concatenate header and convert to char *

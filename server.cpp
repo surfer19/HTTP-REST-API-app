@@ -340,8 +340,8 @@ string setServerHttpHeader(int response, string data, string error_string) {
 	string response_number = to_string(response);
 	string http_response = string("HTTP/1.1 ")+ response_number + response_status +  " \r\n ";
 	string date = "Date: " + currentDateTime() + " \r\n ";
-	string content_type = string("Content-Type: application/json") + " \r\n ";
-	string content_length = string("Content-Length: 12345") + " \r\n ";
+	string content_type = string("Content-Type: text/plain") + " \r\n ";
+	string content_length = string("Content-Length: 42") + " \r\n ";
 	string content_encoding = string("Content-Encoding: identity") + " \r\n ";
 
 	string server_data = data;
