@@ -230,9 +230,11 @@ int main (int argc, const char * argv[]) {
         s_error = s_header;
         cout << "TU6" << endl;
         fprintf(stderr, "%s \n", s_error.c_str());
+        cout << "TU7" << endl;
     }
 
     close(client_socket);
+    cout << "TU8" << endl;
     return 0;
 }
 
