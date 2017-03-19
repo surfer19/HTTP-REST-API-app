@@ -206,8 +206,8 @@ int main (int argc, const char * argv[]) {
         }
     }
 
-    printf("[CLIENT] RESPONSE from server: %s \n", buf);
-    cout << "vazne to tu spadne????" << endl;
+    //printf("[CLIENT] RESPONSE from server: %s \n", buf);
+    //cout << "vazne to tu spadne????" << endl;
     //string s_header = buf;
 
     //string s_helper = "";
