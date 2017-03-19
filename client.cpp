@@ -208,11 +208,11 @@ int main (int argc, const char * argv[]) {
 
     printf("[CLIENT] RESPONSE from server: %s \n", buf);
     cout << "vazne to tu spadne????" << endl;
-    string s_header = buf;
+    //string s_header = buf;
 
-    string s_helper = "";
-    string s_error = "";
-    cout << "TU" << endl;
+    //string s_helper = "";
+    //string s_error = "";
+    //cout << "TU" << endl;
 
 /*    if (isInString(s_header, "ERR") != -1) {
         cout << "TU1" << endl;
