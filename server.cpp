@@ -133,7 +133,7 @@ void parseClientHeader(char *buff, int comm_socket, string root_path){
 
 	// push each splited value as one item of vector
 	auto strings = split_string(Str, "\n");
-	int i = 1;
+
 	for (auto itr = strings.begin(); itr != strings.end(); itr++){
 		list_header_attributes.push_back(*itr);
 	}

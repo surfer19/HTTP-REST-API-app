@@ -50,7 +50,7 @@ const string currentDateTime() {
 int main (int argc, const char * argv[]) {
 
 	int client_socket, port_number, bytestx, bytesrx;
-    socklen_t serverlen;
+    //socklen_t serverlen;
     const char *server_hostname;
     struct hostent *server;
     struct sockaddr_in server_address;
@@ -117,7 +117,7 @@ int main (int argc, const char * argv[]) {
        final_command = "PUT";
    }
    else {
-       fprintf(stderr,"Unknown error.%s \n");
+       fprintf(stderr,"Unknown error.\n");
    }
     string type_of_medium;
     // its file or folder ?
@@ -187,7 +187,7 @@ int main (int argc, const char * argv[]) {
     }
     memset(buf, '\0', sizeof(buf));
 
-    while (bytesrx = recv(client_socket, buf, BUFSIZE, 0) > 0) {
+    while ((bytesrx = recv(client_socket, buf, BUFSIZE, 0)) > 0) {
 
         if (bytesrx < 0) {
             perror("ERROR in recvfrom");
