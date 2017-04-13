@@ -61,7 +61,7 @@ int main (int argc, const char * argv[]) {
 		}
 		else {
 			fprintf(stderr, "Unknown error.\n");
-			exit(EXIT_FAILURE);
+			//exit(//exit_FAILURE);
 		}
 	}
 	else if (argc == 5){
@@ -70,39 +70,39 @@ int main (int argc, const char * argv[]) {
 	}
 	else {
 		fprintf(stderr, "Unknown error.\n");
-		exit(EXIT_FAILURE);
+		//exit(//exit_FAILURE);
 	}
 
 	char *cstr = &root_path.back();
 	if (strcmp(cstr, "/") == 0) {
 		root_path.erase(root_path.end() - 1);
 	}
-    
+
 	socklen_t sa_client_len=sizeof(sa_client);
 	if ((welcome_socket = socket(PF_INET6, SOCK_STREAM, 0)) < 0)
 	{
 		perror("ERROR: socket");
-		exit(EXIT_FAILURE);
+		//exit(//exit_FAILURE);
 	}
-	
+
 	memset(&sa,0,sizeof(sa));
 	sa.sin6_family = AF_INET6;
 	sa.sin6_addr = in6addr_any;
-	sa.sin6_port = htons(port_number);	
+	sa.sin6_port = htons(port_number);
 
 	if ((::bind(welcome_socket, (struct sockaddr*)&sa, sizeof(sa))) < 0)
 	{
 		perror("ERROR: bind");
-		exit(EXIT_FAILURE);
+		//exit(//exit_FAILURE);
 	}
 	if ((listen(welcome_socket, 1)) < 0)
 	{
 		perror("ERROR: listen");
-		exit(EXIT_FAILURE);				
+		//exit(EXIT_FAILURE);
 	}
 	while(1)
 	{
-		int comm_socket = accept(welcome_socket, (struct sockaddr*)&sa_client, &sa_client_len);		
+		int comm_socket = accept(welcome_socket, (struct sockaddr*)&sa_client, &sa_client_len);
 		if (comm_socket > 0)
 		{
 			inet_ntop(AF_INET6, &sa_client.sin6_addr, str, sizeof(str));
@@ -118,7 +118,7 @@ int main (int argc, const char * argv[]) {
 
 		//fprintf(stderr, "Connection to closed\n");
 		close(comm_socket);
-	}	
+	}
 }
 
 void parseClientHeader(char *buff, int comm_socket, string root_path){
